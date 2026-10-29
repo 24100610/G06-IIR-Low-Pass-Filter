@@ -1,0 +1,8 @@
+*.vcd
+*.fst
+*.gtkw
+*.o
+*.elf
+*.bin
+*.log
+__pycache__/
