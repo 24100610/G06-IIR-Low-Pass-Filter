@@ -1,0 +1,38 @@
+{
+  "project_id": "G06",
+  "title": "Bộ lọc thông thấp IIR bậc một hệ số 1/2",
+  "group": "G · Xử lý tín hiệu số đơn giản",
+  "difficulty": "Trung bình",
+  "circuit_type": "Tuần tự",
+  "charter_scale": "~180–260 cell · 1×1 tile",
+  "top_module": "g06_iir_half",
+  "clock_port": "clk",
+  "has_clock": true,
+  "expected_ff_zero": false,
+  "technology": "sky130A",
+  "std_cell_library": "sky130_fd_sc_hd",
+  "liberty_corner": "tt_025C_1v80",
+  "flow": "LibreLane/OpenROAD",
+  "measured": {
+    "sim": "PASS",
+    "pyref": "PASS",
+    "synth": "PASS",
+    "sta": "PASS",
+    "cells": 54,
+    "flip_flops": 9,
+    "area_um2": 482.9632,
+    "critical_path_ns": 3.75,
+    "startpoint": "x[1]",
+    "endpoint": "_98_",
+    "power_total_w": "6.04e-05"
+  },
+  "not_run": [
+    "floorplan",
+    "placement",
+    "routing",
+    "drc",
+    "lvs",
+    "gds"
+  ],
+  "source_dir_origin": "G06_FINAL_MENTOR_PACKAGE_v1_0"
+}

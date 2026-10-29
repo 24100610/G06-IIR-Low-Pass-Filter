@@ -1,8 +1,8 @@
 *.vcd
 *.fst
 *.gtkw
-*.o
-*.elf
-*.bin
-*.log
+*.vvp
+*.bak
 __pycache__/
+04_IMPLEMENTATION/scripts/runs/
+06_GDSII/

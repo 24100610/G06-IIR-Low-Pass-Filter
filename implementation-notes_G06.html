@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G06 — Bộ lọc thông thấp IIR bậc một hệ số 1/2 · Ghi chú thực hiện</title>
+<style>
+:root{
+  --bg:#ffffff; --fg:#1a1d21; --muted:#5c6570; --line:#e3e7eb;
+  --accent:#1f5fa9; --accent-soft:#eef4fb; --code-bg:#f5f7f9;
+  --ok:#137a4d; --ok-bg:#e8f6ee; --warn:#8a5a00; --warn-bg:#fdf4e2;
+  --bad:#a52020; --bad-bg:#fceded; --open:#7a5ba8; --open-bg:#f3eefa;
+  --maxw:960px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15181c; --fg:#e6e9ec; --muted:#98a2ad; --line:#2a2f36;
+    --accent:#6fa8e0; --accent-soft:#1c2733; --code-bg:#1b1f24;
+    --ok:#5cc08d; --ok-bg:#16291f; --warn:#d8a54a; --warn-bg:#2a2314;
+    --bad:#e88b8b; --bad-bg:#2b1a1a; --open:#b79ad6; --open-bg:#241d2e;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15181c; --fg:#e6e9ec; --muted:#98a2ad; --line:#2a2f36;
+  --accent:#6fa8e0; --accent-soft:#1c2733; --code-bg:#1b1f24;
+  --ok:#5cc08d; --ok-bg:#16291f; --warn:#d8a54a; --warn-bg:#2a2314;
+  --bad:#e88b8b; --bad-bg:#2b1a1a; --open:#b79ad6; --open-bg:#241d2e;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:var(--maxw); margin:0 auto; padding:0 16px 96px}
+header.doc{
+  border-bottom:1px solid var(--line); margin-bottom:28px; padding:36px 0 22px;
+}
+header.doc .eyebrow{
+  font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--muted); font-weight:600; margin-bottom:10px;
+}
+header.doc h1{font-size:clamp(24px,4.4vw,34px); line-height:1.25; margin:0 0 14px}
+.badges{display:flex; flex-wrap:wrap; gap:7px; margin-top:6px}
+.badge{
+  font-size:12.5px; padding:3px 10px; border-radius:999px;
+  border:1px solid var(--line); color:var(--muted); background:var(--accent-soft);
+  white-space:nowrap;
+}
+.badge.ok{color:var(--ok); background:var(--ok-bg); border-color:transparent}
+.badge.warn{color:var(--warn); background:var(--warn-bg); border-color:transparent}
+.badge.bad{color:var(--bad); background:var(--bad-bg); border-color:transparent}
+.badge.open{color:var(--open); background:var(--open-bg); border-color:transparent}
+nav.toc{
+  border:1px solid var(--line); border-radius:10px; padding:16px 20px;
+  margin:0 0 32px; background:var(--accent-soft);
+}
+nav.toc p{margin:0 0 8px; font-weight:700; font-size:13px; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--muted)}
+nav.toc ul{margin:0; padding-left:20px}
+nav.toc li{margin:3px 0}
+nav.toc a{color:var(--fg); text-decoration:none}
+nav.toc a:hover{color:var(--accent); text-decoration:underline}
+nav.toc ul ul{padding-left:18px; font-size:14.5px}
+h2{font-size:22px; margin:40px 0 12px; padding-bottom:6px; border-bottom:1px solid var(--line)}
+h3{font-size:18px; margin:28px 0 8px}
+h4{font-size:16px; margin:22px 0 6px; color:var(--muted)}
+p{margin:12px 0}
+a{color:var(--accent)}
+ul,ol{padding-left:24px}
+li{margin:4px 0}
+code{
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  font-size:.9em; background:var(--code-bg); padding:1.5px 5px; border-radius:4px;
+}
+pre{
+  background:var(--code-bg); border:1px solid var(--line); border-radius:8px;
+  padding:14px 16px; overflow-x:auto; line-height:1.55; font-size:13.5px;
+}
+pre code{background:none; padding:0; font-size:inherit}
+blockquote{
+  margin:16px 0; padding:2px 18px; border-left:3px solid var(--accent);
+  background:var(--accent-soft); border-radius:0 8px 8px 0; color:var(--fg);
+}
+blockquote p{margin:10px 0}
+.tablewrap{overflow-x:auto; margin:16px 0; -webkit-overflow-scrolling:touch}
+table{border-collapse:collapse; width:100%; font-size:14.5px; min-width:420px}
+th,td{border:1px solid var(--line); padding:7px 11px; text-align:left; vertical-align:top}
+th{background:var(--accent-soft); font-weight:650; white-space:nowrap}
+tbody tr:nth-child(even) td{background:color-mix(in srgb, var(--code-bg) 55%, transparent)}
+hr{border:0; border-top:1px solid var(--line); margin:34px 0}
+footer.doc{
+  margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
+  color:var(--muted); font-size:13.5px;
+}
+.themebtn{
+  position:fixed; right:14px; bottom:14px; z-index:10;
+  border:1px solid var(--line); background:var(--bg); color:var(--muted);
+  border-radius:999px; padding:8px 14px; font-size:13px; cursor:pointer;
+}
+.themebtn:hover{color:var(--fg)}
+@media (max-width:640px){
+  .wrap{padding:0 16px 72px}
+  header.doc{padding:26px 0 18px}
+  nav.toc{padding:14px 16px}
+}
+@media print{
+  .themebtn{display:none}
+  nav.toc{break-inside:avoid}
+  pre,table,blockquote{break-inside:avoid}
+  body{font-size:11pt}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="doc">
+  <div class="eyebrow">RTL2GDS · Đề G06 · Ghi chú thực hiện</div>
+  <h1>G06 — Bộ lọc thông thấp IIR bậc một hệ số 1/2 · Ghi chú thực hiện</h1>
+  <div class="badges"><span class="badge ">🔧 Đã vá và xác minh lại</span><span class="badge ">G · Xử lý tín hiệu số đơn giản</span><span class="badge ">Độ khó: Trung bình</span><span class="badge ">Loại mạch: Tuần tự</span><span class="badge ok">Mô phỏng: PASS</span><span class="badge ">Tổng hợp: 54 cell · 9 FF</span><span class="badge ">Đường tới hạn: 3,75 ns</span><span class="badge warn">Physical design: CHƯA CHẠY</span></div>
+</header>
+<nav class="toc"><p>Mục lục</p><ul><li><a href="#1-bai-toan-nay-thuc-chat-la-gi">1. Bài toán này thực chất là gì</a></li><li><a href="#2-ban-chat-ky-thuat-co-che-hoat-dong">2. Bản chất kỹ thuật — cơ chế hoạt động</a></li><ul><li><a href="#2-1-vi-sao-he-so-1-2-lai-dac-biet-re">2.1 Vì sao hệ số 1/2 lại đặc biệt rẻ</a></li><li><a href="#2-2-vong-hoi-tiep-la-thu-gioi-han-tan-so">2.2 Vòng hồi tiếp là thứ giới hạn tần số</a></li><li><a href="#2-3-gt-gt-gt-1-lam-tron-xuong-va-do-la-goc-cua-moi-hien-tuong-la">2.3 &amp;gt;&amp;gt;&amp;gt; 1 làm tròn XUỐNG, và đó là gốc của mọi hiện tượng lạ</a></li></ul><li><a href="#3-doc-ma-nguon-rtl-lam-gi-tung-dong-quan-trong">3. Đọc mã nguồn: RTL làm gì, từng dòng quan trọng</a></li><li><a href="#4-vi-sao-chon-kien-truc-nay">4. Vì sao chọn kiến trúc này</a></li><li><a href="#5-cach-thuc-hien-lo-trinh-8-buoc-tu-dac-ta-toi-gdsii">5. Cách thực hiện — lộ trình 8 bước từ đặc tả tới GDSII</a></li><li><a href="#6-so-lieu-that-da-do-duoc-va-cach-doc-chung">6. Số liệu thật đã đo được và cách đọc chúng</a></li><li><a href="#7-tra-loi-cac-cau-hoi-ky-thuat-cua-charter-muc-2">7. Trả lời các câu hỏi kỹ thuật của Charter (mục 2)</a></li><li><a href="#8-tra-loi-cau-phan-tich-rieng-charter-muc-9">8. Trả lời câu phân tích riêng (Charter mục 9)</a></li><li><a href="#9-nhung-cho-sinh-vien-hay-sai-va-cach-phat-hien">9. Những chỗ sinh viên hay sai và cách phát hiện</a></li><li><a href="#10-cau-hoi-mentor-nen-dat-khi-bao-ve">10. Câu hỏi mentor nên đặt khi bảo vệ</a></li><li><a href="#11-gioi-han-da-chung-minh-duoc-gi-chua-chung-minh-duoc-gi">11. Giới hạn: đã chứng minh được gì, chưa chứng minh được gì</a></li></ul></nav>
+<main>
+<blockquote>
+<p>⚠️ Mô phỏng RTL của đề này <strong>dừng ở một assertion</strong>. Phán xử đầy đủ:
+<code>05_VERIFICATION/known_issues.md</code>. Kết luận ngắn: <strong>lỗi nằm ở testbench</strong>, RTL đúng.</p>
+</blockquote>
+<h2 id="1-bai-toan-nay-thuc-chat-la-gi">1. Bài toán này thực chất là gì</h2>
+<p>Đề yêu cầu một bộ lọc thông thấp, nhưng điều đáng học không nằm ở chữ "lọc". Nó nằm ở chỗ
+<strong>đây là đề đầu tiên trong nhóm G có vòng hồi tiếp</strong>, và vòng đó đổi toàn bộ cách suy nghĩ về
+thiết kế.</p>
+<p>Với một bộ lọc FIR (G01: trung bình trượt 4 điểm), đầu ra là hàm của <strong>bốn mẫu gần nhất</strong>.
+Muốn biết <code>y[n]</code> chỉ cần nhìn một cửa sổ hữu hạn về quá khứ. Với IIR, <code>y[n]</code> phụ thuộc vào
+<code>y[n−1]</code>, mà <code>y[n−1]</code> lại phụ thuộc <code>y[n−2]</code>… — <strong>toàn bộ lịch sử</strong> được nén vào một con số
+8 bit. Đó là lý do G06 chỉ cần <strong>9 flip-flop</strong> trong khi G01 cần <strong>58</strong>: tỷ lệ <strong>6,4 lần</strong>,
+đo được từ hai <code>synth_stat.txt</code>.</p>
+<p>Bối cảnh (Charter mục 1): làm trơn tín hiệu cảm biến ánh sáng để chỉnh độ sáng màn hình.
+Cảm biến ánh sáng có nhiễu và có đột biến ngắn (bóng tay, đèn flash); đưa thẳng vào điều
+khiển độ sáng thì màn hình <strong>nhấp nháy</strong>. Bộ lọc biến đột biến thành thay đổi từ từ.</p>
+<p>Nhưng cái giá của sự rẻ đó là hai thứ mà Charter mục 2 hỏi thẳng: <strong>vấn đề làm tròn</strong> khi
+dịch phải số có dấu, và hiện tượng <strong>đứng yên</strong> ở giá trị nhỏ. Hai thứ này mới là nội dung
+thật của đề.</p>
+<h2 id="2-ban-chat-ky-thuat-co-che-hoat-dong">2. Bản chất kỹ thuật — cơ chế hoạt động</h2>
+<h3 id="2-1-vi-sao-he-so-1-2-lai-dac-biet-re">2.1 Vì sao hệ số 1/2 lại đặc biệt rẻ</h3>
+<pre><code>   y[n] = ⎣ (x[n] + y[n−1]) / 2 ⎦
+</code></pre>
+<p>Phép chia cho 2 hiện thực bằng <code>&gt;&gt;&gt; 1</code>, mà <strong>dịch theo hằng số không tốn cổng logic nào</strong> —
+nó chỉ là <strong>cách đấu dây khác đi</strong>: <code>y_shift[i] = sum_ext[i+1]</code>. Bằng chứng: trong 54 cell
+của netlist <strong>không có cell dịch nào</strong>, và không có bộ nhân nào. Toàn bộ 45 cell tổ hợp là
+<strong>một bộ cộng 9 bit</strong> cộng vài cổng mux giữ.</p>
+<p>Đổi hệ số thành <code>0,3</code> thì cần một bộ nhân 8×8 (≥ 60 cell) hoặc nhiều tầng shift-add. Đó là
+lý do Charter chốt hệ số <code>1/2</code> và liệt "hệ số lập trình được" vào ngoài phạm vi.</p>
+<h3 id="2-2-vong-hoi-tiep-la-thu-gioi-han-tan-so">2.2 Vòng hồi tiếp là thứ giới hạn tần số</h3>
+<p>Đây là cơ chế quan trọng nhất và là nội dung Charter mục 9 yêu cầu:</p>
+<pre><code>  y[n] phải ỔN ĐỊNH HOÀN TOÀN trước cạnh lên kế tiếp,
+  vì chính nó là đầu vào tính y[n+1].
+
+  T_clk  ≥  t_ckq(y[0])  +  t_cộng_9bit  +  t_mux_giữ  +  t_setup(y[7])  +  t_skew
+</code></pre>
+<p>Không thể pipeline. Chèn một thanh ghi vào giữa vòng thì <code>y[n]</code> sẽ dùng <code>y[n−2]</code> thay vì
+<code>y[n−1]</code> ⟹ <strong>hàm truyền đổi</strong>, không còn là bộ lọc đã đặc tả. Đây là điểm khác cơ bản với
+FIR, nơi có thể chèn thanh ghi ở bất kỳ đâu mà chỉ tăng độ trễ chứ không đổi hàm truyền.</p>
+<p>Trong bộ cộng, nút thắt là <strong>chuỗi carry nối tiếp</strong>: <code>c[i+1]</code> cần <code>c[i]</code> đã ổn định. Bằng
+chứng cấu trúc đọc thẳng từ STA — slack theo từng bit của <code>y</code> <strong>giảm đơn điệu</strong>:</p>
+<pre><code>  y[0] 8,51 → y[1] 8,29 → y[2] 7,94 → y[3] 7,41 → y[4] 7,03 → y[5] 6,69 → y[6] 6,31 → y[7] 6,18 ns
+</code></pre>
+<p>Nếu tool đã dựng carry-lookahead thì các số này sẽ gần bằng nhau. Chúng giảm đều ⟹ <strong>ripple-carry</strong>.</p>
+<h3 id="2-3-gt-gt-gt-1-lam-tron-xuong-va-do-la-goc-cua-moi-hien-tuong-la">2.3 <code>&gt;&gt;&gt; 1</code> làm tròn XUỐNG, và đó là gốc của mọi hiện tượng lạ</h3>
+<p>Dịch phải <strong>số học</strong> nhân bản bit dấu, nên nó tương đương chia 2 <strong>rồi làm tròn về −∞</strong>:</p>
+<pre><code>  −103 (9 bit):  1 1001 1001
+  &gt;&gt;&gt; 1:         1 1100 1100  =  −52     (KHÔNG phải −51)
+</code></pre>
+<p>Từ một dòng này suy ra được cả ba hiện tượng mà đề quan tâm. Gọi <code>Δ = ⎣(x − y)/2⎦</code> là bước
+nhảy mỗi mẫu:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th style="text-align: right;"><code>x − y</code></th>
+<th style="text-align: right;"><code>Δ</code></th>
+<th>Hệ quả</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;"><code>≥ +2</code></td>
+<td style="text-align: right;"><code>≥ +1</code></td>
+<td>bộ lọc đi lên bình thường</td>
+</tr>
+<tr>
+<td style="text-align: right;"><code>+1</code></td>
+<td style="text-align: right;"><strong>0</strong></td>
+<td><strong>ĐỨNG YÊN</strong> — không nhích được</td>
+</tr>
+<tr>
+<td style="text-align: right;"><code>0</code></td>
+<td style="text-align: right;">0</td>
+<td>điểm bất động</td>
+</tr>
+<tr>
+<td style="text-align: right;"><code>−1</code></td>
+<td style="text-align: right;"><strong>−1</strong></td>
+<td>vẫn giảm được 1</td>
+</tr>
+<tr>
+<td style="text-align: right;"><code>≤ −2</code></td>
+<td style="text-align: right;"><code>≤ −1</code></td>
+<td>đi xuống bình thường</td>
+</tr>
+</tbody>
+</table></div>
+<p>Cột <code>+1</code> so với cột <code>−1</code> là <strong>bất đối xứng</strong>, và nó sinh ra:</p>
+<ol>
+<li><strong>Đáp ứng bước nhảy dương dừng ở <code>x − 1</code></strong>, không đạt <code>x</code>. Với <code>x = 100</code>: dãy 50, 75, 87,
+   93, 96, 98, 99, <strong>99</strong> — kẹt ở 99.</li>
+<li><strong>Bước nhảy âm thì đạt đúng <code>x</code></strong>. Với <code>x = −100</code>: −50, −75, −88, −94, −97, −99, <strong>−100</strong>.</li>
+<li><strong>Đứng yên ở giá trị nhỏ</strong>: <code>x = 1</code>, <code>y = 0</code> ⟹ <code>Δ = 0</code> ⟹ bộ lọc <strong>không làm gì cả</strong>, mãi
+   mãi. Golden model xác nhận: <code>run([1]*12)</code> cho <code>[0]*12</code>.</li>
+<li><strong>Bẫy nguy hiểm nhất, chưa ai kiểm</strong>: <code>y = −1</code>, <code>x = 0</code> ⟹ <code>x − y = +1</code> ⟹ <code>Δ = 0</code> ⟹ bộ lọc
+   <strong>kẹt ở −1 vĩnh viễn</strong>. Sau mỗi lần tín hiệu đi xuống, nó để lại một sai lệch DC −1 LSB
+   không bao giờ tự sạch.</li>
+</ol>
+<h2 id="3-doc-ma-nguon-rtl-lam-gi-tung-dong-quan-trong">3. Đọc mã nguồn: RTL làm gì, từng dòng quan trọng</h2>
+<p>Toàn bộ thiết kế là 38 dòng. Hai đoạn quyết định tất cả.</p>
+<p><strong>Đoạn 1 — datapath (dòng 16–21), năm dòng mà ba dòng tốn 0 cell:</strong></p>
+<pre><code class="language-systemverilog">always_comb begin
+    x_ext   = {x[7], x};        // mở rộng dấu 8→9: ĐẤU DÂY, 0 cell
+    y_ext   = {y_q[7], y_q};    // ĐẤU DÂY, 0 cell
+    sum_ext = x_ext + y_ext;    // ← TOÀN BỘ 45 cell tổ hợp nằm ở ĐÂY
+    y_shift = sum_ext &gt;&gt;&gt; 1;    // ĐẤU DÂY, 0 cell
+end
+</code></pre>
+<p>Mở rộng dấu lên 9 bit <strong>trước</strong> khi cộng là chi tiết bảo đảm <strong>không bao giờ tràn</strong>: <code>x</code> và
+<code>y_q</code> đều thuộc <code>[−128, 127]</code>, tổng thuộc <code>[−256, 254]</code>, vừa khít 9 bit; sau <code>&gt;&gt;&gt; 1</code> kết quả
+về <code>[−128, 127]</code>, vừa khít 8 bit. Golden model kiểm điều này <strong>vét cạn</strong> chứ không lấy mẫu
+(<code>test_feedback_bound()</code>). Đây là thiết kế <strong>đúng bằng xây dựng</strong> — không cần logic bão hoà,
+không cần cờ tràn, và không tồn tại ca kiểm thử nào làm nó tràn.</p>
+<p><strong>Đoạn 2 — hai lệnh gán giống hệt nhau (dòng 30–34):</strong></p>
+<pre><code class="language-systemverilog">if (valid_in) begin
+    y_q       &lt;= y_shift[7:0];   // trạng thái nội bộ
+    y         &lt;= y_shift[7:0];   // cổng ra — CÙNG nguồn, CÙNG enable, CÙNG reset
+    valid_out &lt;= 1'b1;
+end
+</code></pre>
+<p>Đọc RTL bằng tay ta đếm <strong>17</strong> flip-flop (8 + 8 + 1). Netlist chỉ có <strong>9</strong>. Yosys đã <strong>hợp
+nhất <code>y_q</code> vào <code>y</code></strong> vì hai thanh ghi giống nhau về mọi mặt. Bằng chứng: netlist <strong>không có</strong>
+wire <code>\y_q[…]</code> nào; chín <code>dfxtp_1</code> là <code>y[0..7]</code> và <code>valid_out</code>.</p>
+<p>Hệ quả cần biết: ở mức RTL, <code>y_q</code> là trạng thái <strong>nội bộ</strong> và <code>y</code> là <strong>cổng ra</strong>; ở mức
+netlist chúng là <strong>cùng một dây</strong>. Vòng hồi tiếp thật sự chạy <strong>qua chân ra <code>y</code></strong>.</p>
+<p>Một chi tiết nữa: <code>always_ff @(posedge clk)</code> <strong>không</strong> có <code>or negedge rst_n</code> ⟹ reset <strong>đồng
+bộ</strong>. Bằng chứng mạnh hơn ở netlist: cả 9 flip-flop là <code>dfxtp_1</code> — loại <strong>không có</strong> chân
+reset. Ở mạch IIR điều này quan trọng hơn bình thường: nếu <code>y_q</code> khởi động ở <code>X</code>, giá trị đó
+quay vòng mãi mãi và <strong>không bao giờ tự sạch</strong>.</p>
+<h2 id="4-vi-sao-chon-kien-truc-nay">4. Vì sao chọn kiến trúc này</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Quyết định</th>
+<th>Lý do</th>
+<th>Bằng chứng</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IIR thay vì FIR</td>
+<td>Bộ nhớ O(1) thay vì O(N)</td>
+<td>9 FF so với 58 FF của G01 — <strong>6,4 lần</strong></td>
+</tr>
+<tr>
+<td>Hệ số <code>2^−1</code></td>
+<td>Hiện thực bằng đấu dây, <strong>0 cell</strong></td>
+<td>Netlist không có cell dịch nào</td>
+</tr>
+<tr>
+<td>Ripple-carry</td>
+<td>Yosys chọn mặc định; với slack <strong>6,18 ns / 10 ns</strong> thì không cần nhanh hơn</td>
+<td>Slack giảm đơn điệu theo bit</td>
+</tr>
+<tr>
+<td>Mở rộng dấu 9 bit</td>
+<td>Không tràn <strong>bằng xây dựng</strong>, thay vì xử lý tràn bằng logic bão hoà</td>
+<td><code>test_feedback_bound()</code> vét cạn</td>
+</tr>
+<tr>
+<td>Dùng <code>&gt;&gt;&gt;</code> (floor) thay vì làm tròn</td>
+<td><strong>Có chủ ý</strong> — Charter mục 2 câu 2 và mục 10 lấy hiện tượng này làm nội dung dạy</td>
+<td>Charter</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="5-cach-thuc-hien-lo-trinh-8-buoc-tu-dac-ta-toi-gdsii">5. Cách thực hiện — lộ trình 8 bước từ đặc tả tới GDSII</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Bước</th>
+<th style="text-align: center;">Trạng thái</th>
+<th>Bằng chứng</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Suy công thức và bảng hành vi từ Charter</td>
+<td style="text-align: center;">✅</td>
+<td><code>functional_spec.md</code> §3</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Viết mô hình chuẩn Python độc lập</td>
+<td style="text-align: center;">✅ <strong>PASS</strong> (10 test, có vét cạn vòng hồi tiếp)</td>
+<td><code>python_reference_run.log</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Viết RTL bám ràng buộc "bậc một, hệ số 1/2, không bộ nhân"</td>
+<td style="text-align: center;">✅</td>
+<td><code>g06_iir_half.sv</code>, 38 dòng</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Viết testbench tự kiểm</td>
+<td style="text-align: center;">⚠️ <strong>RAN_WITH_ISSUES</strong> — dừng ở lệnh <code>send()</code> thứ 11</td>
+<td><code>simulation.log</code>; phán xử ở <code>known_issues.md</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Tổng hợp ra standard cell sky130</td>
+<td style="text-align: center;">✅</td>
+<td>54 cell · 9 FF · 482,9632 µm²</td>
+</tr>
+<tr>
+<td>6</td>
+<td>STA với SDC (10 ns, IO delay 1 ns)</td>
+<td style="text-align: center;">✅</td>
+<td>3,75 ns · slack 6,18 ns · WNS/TNS 0,00</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Ước lượng công suất</td>
+<td style="text-align: center;">✅</td>
+<td>6,04e-05 W (tuần tự 71,2 %)</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Place &amp; route → DRC/LVS → GDSII</td>
+<td style="text-align: center;">⬜ <strong>chưa chạy</strong></td>
+<td>cần LibreLane + PDK sky130A</td>
+</tr>
+</tbody>
+</table></div>
+<p>Bước 4 <strong>không</strong> làm hỏng bước 5–7: tổng hợp, STA và công suất đều chạy từ <strong>RTL</strong>, không từ
+testbench. Và phán xử cho thấy lỗi nằm ở testbench, nên mọi số liệu vật lý giữ nguyên giá trị.</p>
+<h2 id="6-so-lieu-that-da-do-duoc-va-cach-doc-chung">6. Số liệu thật đã đo được và cách đọc chúng</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Số</th>
+<th style="text-align: right;">Giá trị</th>
+<th><strong>Chứng minh</strong> điều gì</th>
+<th><strong>KHÔNG</strong> chứng minh điều gì</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Số cell</td>
+<td style="text-align: right;">54</td>
+<td>Thiết kế tổng hợp được; <strong>nhỏ hơn nhiều</strong> ước lượng Charter (180–260) vì đây là module lõi trần</td>
+<td>Không nói gì về chức năng</td>
+</tr>
+<tr>
+<td>Flip-flop</td>
+<td style="text-align: right;"><strong>9</strong></td>
+<td>Đúng dự kiến Charter mục 10 (9–10) ⟹ chỉ nhớ <code>y[n−1]</code> + 1 cờ. <strong>Và</strong> <code>y_q</code> đã bị hợp nhất vào <code>y</code></td>
+<td>Không chứng minh 9 là tối thiểu tuyệt đối (bỏ <code>valid_out</code> thì còn 8)</td>
+</tr>
+<tr>
+<td>Diện tích</td>
+<td style="text-align: right;">482,9632 µm²</td>
+<td>Vừa một ô 1×1, còn rất nhiều chỗ trống</td>
+<td>Chưa gồm dây, chưa gồm lớp vỏ <code>tt_um_*</code></td>
+</tr>
+<tr>
+<td>Thanh ghi / tổ hợp</td>
+<td style="text-align: right;">180,17 µm² (37,3 %) / 302,79 µm² (62,7 %)</td>
+<td>Ở G06 phần <strong>tổ hợp</strong> chiếm đa số — ngược với G05 (42,9 % / 57,1 %) và G07</td>
+<td>Tỷ lệ này tính từ <code>dfxtp_1 = 20,0192 µm²</code> trong Liberty, không phải từ báo cáo riêng</td>
+</tr>
+<tr>
+<td>Đường tới hạn</td>
+<td style="text-align: right;"><code>x[1] → y[7]</code>, 3,75 ns</td>
+<td>Nút thắt là <strong>chuỗi carry của bộ cộng</strong>: 5 <code>maj3_1</code> = 1,95 ns = <strong>71 %</strong> của 2,75 ns độ trễ cell</td>
+<td><strong>Không</strong> nghĩa là "chạy được ở 266 MHz". Gồm 1,00 ns IO delay <strong>giả định</strong>, chưa có dây, 1 góc PVT</td>
+</tr>
+<tr>
+<td>Slack setup</td>
+<td style="text-align: right;">6,18 ns</td>
+<td>Còn dư nhiều với chu kỳ giả định 10 ns</td>
+<td>Sẽ co lại sau P&amp;R và ở góc <code>ss</code></td>
+</tr>
+<tr>
+<td>Slack hold</td>
+<td style="text-align: right;">0,47 ns</td>
+<td>Không vi phạm hold ở mức sau tổng hợp</td>
+<td>Tính với <strong>clock lý tưởng, skew = 0</strong></td>
+</tr>
+<tr>
+<td>Công suất</td>
+<td style="text-align: right;">6,04e-05 W (tuần tự <strong>71,2 %</strong>)</td>
+<td>Dù chỉ 9 FF, chúng vẫn là nhóm tốn nhất</td>
+<td><strong>Ước lượng</strong> với hoạt động mặc định, không từ VCD</td>
+</tr>
+<tr>
+<td>So với G01</td>
+<td style="text-align: right;">6,4× ít FF · 5,4× ít diện tích</td>
+<td>Vượt dự đoán Charter mục 10 ("hơn 3 lần")</td>
+<td>Hợp lệ vì <strong>cùng</strong> tổ hợp công cụ; không được so chéo với đề chạy môi trường khác</td>
+</tr>
+<tr>
+<td>Mô phỏng RTL</td>
+<td style="text-align: right;">⚠️ dừng ở lệnh 11/11</td>
+<td>Mười vector đầu <strong>đều khớp</strong> DUT ↔ TB ↔ mô hình</td>
+<td><strong>Không</strong> chứng minh chức năng đầy đủ. Ca khe <code>valid_in</code> và ca "đứng yên" chưa chạy</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="7-tra-loi-cac-cau-hoi-ky-thuat-cua-charter-muc-2">7. Trả lời các câu hỏi kỹ thuật của Charter (mục 2)</h2>
+<p><strong>(1) IIR bậc một chỉ cần nhớ <code>y[n−1]</code> — so với G01 (nhớ 4 mẫu) thì tiết kiệm bao nhiêu ô nhớ?</strong></p>
+<p>Đo được, cùng tổ hợp công cụ: G01 có <strong>58</strong> flip-flop / 260 cell / 2623,7664 µm²; G06 có
+<strong>9</strong> flip-flop / 54 cell / 482,9632 µm². Tỷ lệ: <strong>6,4 lần</strong> về flip-flop, <strong>4,8 lần</strong> về
+cell, <strong>5,4 lần</strong> về diện tích. Tiết kiệm tuyệt đối: <strong>2140,80 µm²</strong>. Charter mục 10 dự đoán
+"hơn 3 lần" — số thật <strong>vượt</strong> dự đoán, vì G01 không chỉ cần 4 thanh ghi mẫu mà còn cần
+thanh ghi tổng và các tầng trung gian.</p>
+<p><strong>(2) Dịch phải số có dấu gây vấn đề làm tròn gì, và hiện tượng "đứng yên" ở giá trị nhỏ là gì?</strong></p>
+<p><code>&gt;&gt;&gt; 1</code> làm tròn <strong>xuống</strong> (về −∞), khác với <code>/2</code> vốn làm tròn <strong>về 0</strong>; hai quy tắc chỉ khác
+nhau khi kết quả <strong>âm và lẻ</strong>. Hệ quả: bước nhảy dương hội tụ về <code>x − 1</code> (thiếu 1 LSB), bước
+nhảy âm hội tụ về đúng <code>x</code>. "Đứng yên" là khi <code>x − y = +1</code>: <code>⎣1/2⎦ = 0</code> nên bộ lọc <strong>không
+nhích được</strong> — với <code>x = 1</code>, <code>y = 0</code> thì <code>y</code> đứng yên ở 0 vĩnh viễn (golden:
+<code>test_low_value_standing_still()</code>). Trường hợp nặng nhất: <code>y = −1</code>, <code>x = 0</code> ⟹ kẹt ở −1 mãi
+mãi, tạo sai lệch DC không tự sạch.</p>
+<p>Bằng chứng sống trong chính hồ sơ này: lỗi mô phỏng <code>got=-52 expected=-51</code> <strong>chính là</strong> cái
+bẫy làm tròn này, và nó xuất hiện ở <strong>giá trị âm lẻ đầu tiên</strong> của cả testbench.</p>
+<p><strong>(3) Đáp ứng bước nhảy tiệm cận theo quy luật nào — quan sát trên waveform?</strong></p>
+<p>Sai số giảm <strong>một nửa mỗi mẫu</strong>: với <code>x = 100</code>, sai số đi 50 → 25 → 13 → 7 → 4 → 2 → 1 → 1
+(waveform ở <code>03_ARCHITECTURE/timing_diagram.md</code> §3, cạnh lên 3 tới 10). Đây là quy luật <strong>mũ</strong>
+với hằng số thời gian <code>τ = 1/ln 2 ≈ 1,44</code> mẫu. Thời gian đạt 1 LSB: <code>log₂(100) ≈ 6,6</code> ⟹
+<strong>7 mẫu</strong> — khớp chính xác với quan sát. Hàm truyền <code>H(z) = 0,5/(1 − 0,5·z⁻¹)</code>, cực tại
+<code>z = 0,5</code>, tần số cắt −3 dB <code>f_c ≈ 0,115·f_s</code>.</p>
+<p>Chú ý sai số dừng ở <strong>1</strong> chứ không về 0 — đó là §4.1 ở trên.</p>
+<h2 id="8-tra-loi-cau-phan-tich-rieng-charter-muc-9">8. Trả lời câu phân tích riêng (Charter mục 9)</h2>
+<blockquote>
+<p><em>"Bộ lọc IIR có vòng hồi tiếp, nên đường tới hạn đi từ thanh ghi qua logic rồi quay lại
+chính thanh ghi đó. Chỉ rõ vòng này trong báo cáo STA và giải thích vì sao nó giới hạn tần
+số tối đa."</em></p>
+</blockquote>
+<p><strong>Phát hiện đáng chú ý nhất của cả đề:</strong> <code>timing_report_max.txt</code> <strong>không in ra vòng hồi tiếp</strong>.
+Cả 10 đường trong báo cáo đều là <code>x[1] → FF</code> (8 đường) hoặc <code>FF → y[…]</code> (2 đường). Không có
+đường nào có startpoint <strong>và</strong> endpoint đều là flip-flop.</p>
+<p><strong>Vì sao:</strong> script dùng <code>report_checks -path_delay max -group_path_count 10</code>, mà OpenSTA mặc
+định <code>-endpoint_path_count 1</code> — <strong>chỉ in đường tệ nhất cho mỗi endpoint</strong>. Với endpoint <code>_98_</code>
+(= <code>y[7]</code>) có hai đường cạnh tranh:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Đường</th>
+<th>Xuất phát tại</th>
+<th>Ghi chú</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>① <code>x[1] → cộng → y[7]</code></td>
+<td><code>t = 1,00 ns</code></td>
+<td>1,00 ns là <code>input external delay</code>, một <strong>giả định SDC</strong>, không phải silicon</td>
+</tr>
+<tr>
+<td>② <code>y[0] → cộng → y[7]</code> — <strong>vòng hồi tiếp</strong></td>
+<td><code>t ≈ 0,29 ns</code> (<code>clk→Q</code>)</td>
+<td>bị ① che vì ① tệ hơn ~0,7 ns</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Bằng chứng vòng hồi tiếp vẫn tồn tại:</strong> <code>timing_report_min.txt</code> có <strong>cả 5/5</strong> đường dạng
+<code>_9x_ → _9x_</code> — cùng một flip-flop vừa là startpoint vừa là endpoint. Đó chính là định nghĩa
+của vòng hồi tiếp, chỉ hiện ra ở phía hold:</p>
+<pre><code>  _98_/CLK ──0,29──▶ _98_/Q ──0,06──▶ _87_/Y ──0,06──▶ _89_/Y ──▶ _98_/D   (arrival 0,41 ns)
+</code></pre>
+<p><strong>Vì sao vòng giới hạn tần số:</strong> <code>y[n]</code> phải ổn định hoàn toàn trước cạnh lên kế tiếp vì
+chính nó là đầu vào tính <code>y[n+1]</code>. Không thể pipeline mà không đổi hàm truyền. Cách duy nhất
+rút ngắn là làm bộ cộng nhanh hơn (carry-lookahead thay ripple-carry) — xem <code>tradeoff.md</code> §3.</p>
+<p><strong>Việc cần làm để khép kín</strong> (chưa chạy):</p>
+<pre><code class="language-tcl">report_checks -path_delay max -group_path_count 30 -endpoint_path_count 5
+# hoặc chỉ đích danh:
+report_checks -from [get_pins _91_/CLK] -to [get_pins _98_/D] -path_delay max
+</code></pre>
+<h2 id="9-nhung-cho-sinh-vien-hay-sai-va-cach-phat-hien">9. Những chỗ sinh viên hay sai và cách phát hiện</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Sai lầm</th>
+<th>Hậu quả</th>
+<th><strong>Phát hiện bằng bằng chứng nào</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Tính kỳ vọng bằng <code>−103/2 = −51</code> (làm tròn về 0)</td>
+<td>Testbench báo lỗi trong khi DUT đúng</td>
+<td><strong>Đã xảy ra thật</strong> — <code>simulation.log</code>: <code>got=-52 expected=-51</code>. Đối chiếu golden Python (<code>arshift1(-103) = -52</code>) là cách phán xử</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Dùng <code>&gt;&gt;</code> (dịch logic) thay <code>&gt;&gt;&gt;</code></td>
+<td>Số âm biến thành số dương rất lớn</td>
+<td>Ca <code>x = −128</code> sẽ cho kết quả dương. Ca biên bắt được ngay</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Quên mở rộng dấu trước khi cộng</td>
+<td>Tràn 8 bit: <code>100 + 99 = 199</code> thành <code>−57</code></td>
+<td>Ca bước nhảy dương sẽ sai ngay mẫu thứ 8</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Kiểm ca "đứng yên" khi <code>y</code> đang <strong>lớn</strong></td>
+<td>Ca không kiểm cái nó tưởng đang kiểm</td>
+<td><strong>Đã xảy ra thật</strong> — <code>g06_tb.sv</code> dòng 44–46, xem <code>known_issues.md</code> §7. Phát hiện bằng cách tính <code>x − y</code> tại thời điểm đó: <code>1 − 99 = −98</code>, không phải giá trị nhỏ</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Nạp <code>y_q</code> vô điều kiện (bỏ <code>if (valid_in)</code>)</td>
+<td>Bộ lọc <strong>tự chạy</strong> khi không có mẫu mới, trôi về 0 hoặc −1</td>
+<td>Ca khe <code>valid_in</code> (TB dòng 52–54) — nhưng ca này <strong>chưa chạy</strong> vì <code>$fatal</code> chặn trước</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Tưởng <code>&gt;&gt;&gt; 1</code> cần một bộ dịch</td>
+<td>Ước lượng diện tích sai</td>
+<td>Netlist: <strong>0 cell dịch</strong> trong 54 cell. Dịch theo hằng số là đấu dây</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Tưởng đếm được 17 FF từ RTL</td>
+<td>Nhầm khi đối chiếu với Charter mục 10</td>
+<td><code>synth_stat.txt</code> cho <strong>9</strong>. Yosys hợp nhất <code>y_q</code> vào <code>y</code> vì cùng D/enable/reset</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Cho <code>valid_in</code> là <strong>mức</strong> thay vì <strong>xung</strong></td>
+<td>Bộ lọc nhanh gấp k lần đặc tả ⟹ <code>f_c</code> sai</td>
+<td><strong>Rất khó thấy</strong> — waveform trông "hợp lý", chỉ đếm chu kỳ mới phát hiện. Ca này <strong>chưa có</strong></td>
+</tr>
+<tr>
+<td>9</td>
+<td>Kết luận "đường tới hạn là <code>x[1] → y[7]</code>, vậy vòng hồi tiếp không quan trọng"</td>
+<td>Trả lời sai Charter mục 9</td>
+<td>Đọc <code>timing_report_min.txt</code>: <strong>5/5</strong> đường đều là <code>_9x_ → _9x_</code>. Vòng tồn tại, chỉ bị che ở báo cáo setup</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Tưởng <code>X</code> trong <code>x</code> chỉ ảnh hưởng một mẫu</td>
+<td>Ở IIR, <code>X</code> lan <strong>vĩnh viễn</strong> qua vòng hồi tiếp</td>
+<td>Chạy mô phỏng với một mẫu <code>8'hxx</code> rồi quan sát <code>y</code> ở 50 chu kỳ sau</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="10-cau-hoi-mentor-nen-dat-khi-bao-ve">10. Câu hỏi mentor nên đặt khi bảo vệ</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Câu hỏi</th>
+<th>Đáp án mong đợi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Mô phỏng báo <code>got=-52 expected=-51</code>. Ai sai — DUT, golden model, hay testbench?</td>
+<td><strong>Testbench.</strong> DUT cho −52 (<code>&gt;&gt;&gt; 1</code> làm tròn xuống); golden Python cho −52 (<code>// 2</code>). Hai mô hình độc lập khớp nhau; chỉ hằng số viết tay trong TB sai</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Vì sao lỗi chỉ lộ ra ở mẫu thứ 11?</td>
+<td>Vì <code>&gt;&gt;&gt;</code> và <code>/2</code> chỉ khác nhau khi tổng <strong>âm và lẻ</strong>. Mười tổng đầu đều dương. <code>−103</code> là giá trị âm lẻ <strong>đầu tiên</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td>RTL có 17 lệnh gán thanh ghi nhưng netlist chỉ có 9 FF. Giải thích</td>
+<td>Yosys hợp nhất <code>y_q</code> vào <code>y</code> — cùng <code>D</code>, cùng enable, cùng reset. Netlist không có wire <code>\y_q[…]</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Charter mục 9 bảo chỉ vòng hồi tiếp trong báo cáo STA. Chỉ đi</td>
+<td>Báo cáo <strong>setup</strong> không in nó (mỗi endpoint chỉ in đường tệ nhất, mà đường từ cổng vào có thêm 1,00 ns IO delay). Báo cáo <strong>hold</strong> in đủ: 5/5 đường đều <code>_9x_ → _9x_</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Vì sao không pipeline bộ lọc để chạy nhanh hơn?</td>
+<td>Vì đích của đường <strong>chính là</strong> nguồn của nó. Chèn thanh ghi ⟹ <code>y[n]</code> dùng <code>y[n−2]</code> ⟹ đổi hàm truyền. Đây là đặc tính chung của mọi IIR</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Đáp ứng bước nhảy <code>x = 100</code> dừng ở 99. Lỗi hay đúng?</td>
+<td><strong>Đúng theo đặc tả.</strong> Điểm bất động của <code>y = ⎣(100+y)/2⎦</code> là 99. Hệ quả của làm tròn xuống, không phải lỗi</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Cho <code>x = 1</code> từ trạng thái reset thì <code>y</code> bằng bao nhiêu sau 100 mẫu?</td>
+<td><strong>0.</strong> <code>⎣1/2⎦ = 0</code> ⟹ đứng yên vĩnh viễn. Đây là hiện tượng Charter mục 2 câu 2 hỏi</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Có cách nào xoá hiện tượng đứng yên mà không tốn diện tích?</td>
+<td>Có: <code>(x + y + 1) &gt;&gt;&gt; 1</code> — đặt <code>carry-in = 1</code> cho bộ cộng, chân vốn đã tồn tại ⟹ <strong>0 cell thêm</strong>. Nhưng chỉ lật bất đối xứng sang phía âm, không xoá hẳn</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Vì sao startpoint là <code>x[1]</code> chứ không phải <code>x[0]</code>?</td>
+<td>Vì <code>sum_ext[0]</code> bị <code>&gt;&gt;&gt; 1</code> <strong>vứt bỏ</strong>, không tới flip-flop nào; và carry tầng 0 (<code>x[0] AND y[0]</code>) không có carry-in nên nhanh hơn tầng đầy đủ</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Slack của <code>y[0]</code> là 8,51 ns, của <code>y[7]</code> là 6,18 ns. Điều này nói lên cấu trúc gì?</td>
+<td><strong>Ripple-carry</strong>. Slack giảm <strong>đơn điệu</strong> theo bit là chữ ký của chuỗi carry nối tiếp. Carry-lookahead sẽ cho slack gần bằng nhau</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Mô phỏng chưa chạy hết. Vậy 54 cell · 3,75 ns còn đáng tin không?</td>
+<td><strong>Có.</strong> Tổng hợp và STA chạy từ <strong>RTL</strong>, không từ testbench. Và phán xử cho thấy RTL đúng</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Hồ sơ đã thoả Charter mục 4 chưa?</td>
+<td><strong>Chưa.</strong> Chưa có lớp vỏ <code>tt_um_*</code>, nên "lỗi ánh xạ <code>uio[0]</code> vừa vào vừa ra" mà Charter yêu cầu sửa <strong>chưa được sửa ở đâu cả</strong>. Ngân sách chân thì đủ (18/24)</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="11-gioi-han-da-chung-minh-duoc-gi-chua-chung-minh-duoc-gi">11. Giới hạn: đã chứng minh được gì, chưa chứng minh được gì</h2>
+<p><strong>Đã chứng minh:</strong>
+- Kiến trúc đúng ràng buộc đề: <strong>bậc một</strong> (một thanh ghi trạng thái), <strong>hệ số 1/2</strong> (dịch
+  bit, 0 cell, không bộ nhân), <strong>có hồi tiếp</strong> — bằng chứng đọc từ RTL và netlist.
+- <strong>Không bao giờ tràn</strong> — chứng minh bằng xây dựng (mở rộng dấu 9 bit) và kiểm vét cạn ở
+  golden model.
+- Tiết kiệm <strong>6,4 lần</strong> flip-flop và <strong>5,4 lần</strong> diện tích so với G01, cùng tổ hợp công cụ.
+- Vòng hồi tiếp tồn tại và được STA nhìn thấy — bằng chứng ở <code>timing_report_min.txt</code> (5/5
+  đường <code>_9x_ → _9x_</code>).
+- Số liệu cấu trúc và thời gian thật ở mức <strong>sau tổng hợp</strong>: 54 cell · 9 FF · 482,9632 µm² ·
+  3,75 ns · slack 6,18 ns · 6,04e-05 W.
+- Lỗi mô phỏng đã được <strong>phán xử</strong>: nằm ở testbench, có bản vá một ký tự, RTL không cần sửa.</p>
+<p><strong>Chưa chứng minh:</strong>
+- Chức năng RTL đầy đủ — mô phỏng <strong>dừng ở lệnh <code>send()</code> thứ 11/11</strong>; ca khe <code>valid_in</code> chưa
+  chạy; ca "đứng yên ở giá trị nhỏ" mà Charter mục 8 <strong>bắt buộc</strong> chưa chạy trên RTL.
+- <strong>Độ trễ của chính vòng hồi tiếp</strong> — báo cáo STA hiện tại chưa in ra con số đó.
+- Netlist tương đương chức năng với RTL — chưa mô phỏng gate-level.
+- Độ trễ thật sau routing, biên an toàn qua các góc PVT, công suất từ VCD thật.
+- Tuân thủ Charter mục 4 — chưa có lớp vỏ <code>tt_um_*</code>, chưa chốt đánh số lại <code>uio[0]</code>.
+- Cách hiểu <code>x</code>/<code>y</code> là có dấu hay không dấu — <strong>chưa được chốt ở giao diện</strong>.</p>
+<p><strong>Không được khẳng định</strong> (Charter mục 3): sign-off, tape-out, chế tạo, kiểm tra sau chế tạo,
+"chạy được ở XXX MHz", "đã tối ưu netlist", "đã kiểm chứng đầy đủ chức năng".</p>
+<hr>
+<p><em>Phiên bản: v1.0 · Ngày: 2026-09-24</em></p>
+</main>
+<footer class="doc">
+  Tài liệu sinh từ <code>implementation-notes_G06.md</code>.
+  Mọi số liệu đều kèm công cụ, phiên bản và lệnh tái lập trong
+  <code>07_TRACEABILITY/evidence_index.md</code>.
+</footer>
+</div>
+<script>
+(function(){
+  var b=document.createElement('button');
+  b.className='themebtn'; b.type='button';
+  function lbl(){var t=document.documentElement.getAttribute('data-theme');
+    return t==='dark'?'Nen sang':(t==='light'?'Nen toi':'Doi nen');}
+  b.textContent=lbl();
+  try{var s=localStorage.getItem('rtl2gds-theme'); if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  b.textContent=lbl();
+  b.addEventListener('click',function(){
+    var cur=document.documentElement.getAttribute('data-theme');
+    var mq=window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var next=cur?(cur==='dark'?'light':'dark'):(mq?'light':'dark');
+    document.documentElement.setAttribute('data-theme',next);
+    try{localStorage.setItem('rtl2gds-theme',next);}catch(e){}
+    b.textContent=lbl();
+  });
+  document.body.appendChild(b);
+})();
+</script>
+</body>
+</html>
